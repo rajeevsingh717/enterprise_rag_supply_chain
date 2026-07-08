@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Model & data caches (local embedding models, HF cache)
+.cache/
+models/
+*.bin
+*.safetensors
+
+# Project runtime data (documents, vector/db volumes)
+inbox/*
+!inbox/.gitkeep
+data/
+volumes/
+*.sqlite
+*.db
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp

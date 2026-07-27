@@ -1,0 +1,53 @@
+[project]
+name = "rag-supply-chain"
+version = "0.1.0"
+description = "Resilient real-time unstructured data pipeline for enterprise RAG"
+requires-python = ">=3.11"
+dependencies = [
+    # config
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    # infra clients
+    "confluent-kafka>=2.4",       # Kafka/Redpanda producer + consumer
+    "qdrant-client>=1.10",        # vector DB
+    "psycopg[binary]>=3.2",       # postgres driver
+    "SQLAlchemy>=2.0",            # metadata registry ORM
+    "redis>=5.0",                 # celery backend / health
+    # async workers
+    "celery>=5.4",
+    # embeddings (local) — heavy; pulls torch. Needed from Phase 3 onward.
+    "sentence-transformers>=3.0",
+    # generation + eval judge
+    "anthropic>=0.40",
+    # ingestion / parsing
+    "pypdf>=4.2",
+    "beautifulsoup4>=4.12",
+    "watchdog>=4.0",
+    # cli / utilities
+    "typer>=0.12",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+rag-health = "rag_supply_chain.health:main"
+rag-ingest = "rag_supply_chain.ingestion.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

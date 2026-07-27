@@ -1,0 +1,82 @@
+# Infrastructure for the RAG supply chain. One `docker-compose up -d` brings the
+# whole stack online: broker, vector DB, metadata registry, and task-queue backend.
+# Image tags use `latest` for the fast-moving services so the scaffold keeps working;
+# pin them once you've settled on versions.
+
+services:
+  # --- Message broker (Kafka API) -----------------------------------------
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: rag_redpanda
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container      # single-node, laptop-friendly defaults
+      - --node-id=0
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://localhost:9092
+    ports:
+      - "9092:9092"   # Kafka API (host clients connect here)
+      - "9644:9644"   # admin/metrics HTTP
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --- Vector database (dense + sparse + RRF) -----------------------------
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: rag_qdrant
+    ports:
+      - "6333:6333"   # HTTP / REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      # qdrant image is distroless (no shell/curl); TCP probe via bash /dev/tcp
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --- Metadata registry (doc_id -> chunk_ids, lineage/tombstones) --------
+  postgres:
+    image: postgres:16
+    container_name: rag_postgres
+    environment:
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag
+      POSTGRES_DB: rag_registry
+    ports:
+      # host 5433, not 5432 — avoids clashing with a locally-installed Postgres
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rag_registry"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --- Task-queue backend (Celery broker + result store) ------------------
+  redis:
+    image: redis:7
+    container_name: rag_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  redpanda_data:
+  qdrant_data:
+  postgres_data:
+  redis_data:

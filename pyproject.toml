@@ -38,6 +38,7 @@ dev = [
 rag-health = "rag_supply_chain.health:main"
 rag-ingest = "rag_supply_chain.ingestion.cli:main"
 rag-chunk = "rag_supply_chain.chunking.cli:main"
+rag-embed = "rag_supply_chain.workers.cli:main"
 
 [build-system]
 requires = ["setuptools>=68"]

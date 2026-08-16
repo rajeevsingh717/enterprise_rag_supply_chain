@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     topic_documents_raw: str = "documents.raw"
     topic_documents_dlq: str = "documents.dlq"
     topic_chunks: str = "chunks.embed"
+    topic_chunks_dlq: str = "chunks.dlq"
 
     # --- Qdrant ---
     qdrant_url: str = "http://localhost:6333"
@@ -44,6 +45,13 @@ class Settings(BaseSettings):
     # --- Chunking ---
     chunk_min_tokens: int = 128
     chunk_max_tokens: int = 512
+
+    # --- Embedding worker (dynamic batching + backoff) ---
+    embed_batch_size: int = 16
+    embed_batch_interval_seconds: float = 2.0
+    embed_max_retries: int = 5
+    embed_backoff_base_seconds: float = 1.0
+    embed_backoff_max_seconds: float = 60.0
 
     # --- Claude ---
     anthropic_api_key: str | None = None

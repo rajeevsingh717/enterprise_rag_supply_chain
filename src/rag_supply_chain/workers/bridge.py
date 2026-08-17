@@ -19,7 +19,7 @@ import logging
 import signal
 from typing import Any
 
-from confluent_kafka import Consumer
+from confluent_kafka import Consumer, Message
 
 from rag_supply_chain.config import settings
 from rag_supply_chain.workers.batching import DynamicBatcher
@@ -42,6 +42,7 @@ class EmbeddingBridge:
             max_size=settings.embed_batch_size,
             max_interval_seconds=settings.embed_batch_interval_seconds,
         )
+        self._last_msg: Message | None = None
         self._stop = False
         signal.signal(signal.SIGTERM, self._request_stop)
         signal.signal(signal.SIGINT, self._request_stop)
@@ -59,6 +60,7 @@ class EmbeddingBridge:
                         logger.error("consumer error: %s", msg.error())
                     else:
                         self._batcher.add(json.loads(msg.value()))
+                        self._last_msg = msg
 
                 if self._batcher.should_flush():
                     self._flush()
@@ -70,5 +72,7 @@ class EmbeddingBridge:
     def _flush(self) -> None:
         batch = self._batcher.flush()
         embed_and_upsert_batch.delay(batch)
-        self._consumer.commit(asynchronous=False)
+        if self._last_msg is not None:
+            self._consumer.commit(message=self._last_msg, asynchronous=False)
+            self._last_msg = None
         logger.info("dispatched batch of %d chunk(s)", len(batch))

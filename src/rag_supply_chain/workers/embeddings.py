@@ -62,4 +62,9 @@ def _sparse_embed_one(text: str) -> SparseVectorData:
 def _load_default_model() -> DenseModel:
     from sentence_transformers import SentenceTransformer
 
-    return SentenceTransformer(settings.embedding_model)
+    # Pinned to CPU: this loads inside a Celery prefork worker (a forked child
+    # process), and macOS's MPS/Metal backend is not fork-safe — touching it
+    # post-fork crashes the child with SIGABRT. MPS also doesn't parallelize
+    # across forked processes the way CPU does, so there's no upside to auto-
+    # detecting it here even off of macOS.
+    return SentenceTransformer(settings.embedding_model, device="cpu")

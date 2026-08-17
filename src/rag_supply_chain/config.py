@@ -55,8 +55,12 @@ class Settings(BaseSettings):
 
     # --- Claude ---
     anthropic_api_key: str | None = None
-    gen_model: str = "claude-opus-4-8"
+    gen_model: str = "claude-opus-5"
     judge_model: str = "claude-haiku-4-5"
+
+    # --- Retrieval ---
+    retrieval_top_k: int = 8
+    retrieval_prefetch_limit: int = 20
 
     # --- Paths ---
     inbox_dir: str = Field(default="./inbox")

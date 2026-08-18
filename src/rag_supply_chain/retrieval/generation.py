@@ -58,7 +58,7 @@ def generate_answer(
     if not chunks:
         return AnswerResult(text="No relevant context was found for this question.")
 
-    client = client or anthropic.Anthropic()
+    client = client or anthropic.Anthropic(api_key=settings.anthropic_api_key)
     response = client.messages.create(
         model=settings.gen_model,
         max_tokens=2048,

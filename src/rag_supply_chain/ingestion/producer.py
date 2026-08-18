@@ -64,5 +64,9 @@ class DocumentProducer:
         self._producer.poll(0)
 
 
-def new_doc_id() -> str:
-    return str(uuid.uuid4())
+def new_doc_id(source_uri: str) -> str:
+    """Deterministic per source path (§3.C): re-ingesting the same file must
+    resolve to the same doc_id, or the lineage registry has nothing to diff
+    against and can never recognize a re-ingest as an update to an existing
+    document rather than a brand-new one."""
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, source_uri))

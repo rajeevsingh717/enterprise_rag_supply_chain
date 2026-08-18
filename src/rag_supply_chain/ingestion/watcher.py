@@ -39,7 +39,7 @@ def _wait_until_settled(path: Path) -> bool:
 
 
 def process_file(path: Path, producer: DocumentProducer) -> None:
-    doc_id = new_doc_id()
+    doc_id = new_doc_id(str(path.resolve()))
     result = validate_file(path)
     if result.ok:
         producer.produce_raw(doc_id, path, result.mime_type)

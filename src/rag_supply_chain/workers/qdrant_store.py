@@ -97,3 +97,14 @@ def upsert_chunks(
         client.upsert(collection_name=settings.qdrant_collection, points=points)
 
     return result
+
+
+def delete_chunks(client: QdrantClient, chunk_ids: list[str]) -> None:
+    """Wipe the vectors for `chunk_ids` (§3.C: stale-version purge and
+    document tombstones both land here)."""
+    if not chunk_ids:
+        return
+    client.delete(
+        collection_name=settings.qdrant_collection,
+        points_selector=[point_id_for(chunk_id) for chunk_id in chunk_ids],
+    )

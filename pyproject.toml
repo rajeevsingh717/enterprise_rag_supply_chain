@@ -40,6 +40,7 @@ rag-ingest = "rag_supply_chain.ingestion.cli:main"
 rag-chunk = "rag_supply_chain.chunking.cli:main"
 rag-embed = "rag_supply_chain.workers.cli:main"
 rag-query = "rag_supply_chain.retrieval.cli:main"
+rag-registry = "rag_supply_chain.registry.cli:main"
 
 [build-system]
 requires = ["setuptools>=68"]

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "dataset_version": "system-design-v1",
+  "cases": [
+    {
+      "id": "network-subnet-purpose",
+      "question": "What does a subnet do, and how is its address range specified?",
+      "reference_answer": "A subnet divides a larger network into a smaller routable segment, and a CIDR block specifies its address range.",
+      "expected_source_uri_contains": "system_design.md"
+    },
+    {
+      "id": "database-async-replication-risk",
+      "question": "What data-loss risk does asynchronous database replication create during primary failure?",
+      "reference_answer": "Recent acknowledged writes can be lost because they may not have reached a replica before the primary fails.",
+      "expected_source_uri_contains": "system_design.md"
+    },
+    {
+      "id": "load-balancer-layer-comparison",
+      "question": "How do Layer 4 and Layer 7 load balancers differ?",
+      "reference_answer": "Layer 4 balances raw TCP or UDP connections, while Layer 7 inspects HTTP data and can route by path or hostname.",
+      "expected_source_uri_contains": "system_design.md"
+    }
+  ]
+}

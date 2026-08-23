@@ -1,0 +1,47 @@
+{
+  "case_count": 3,
+  "cases": [
+    {
+      "answer_relevance": 0.98,
+      "citation_hit": 1.0,
+      "context_precision": 0.75,
+      "faithfulness": 0.95,
+      "id": "network-subnet-purpose",
+      "reciprocal_rank": 1.0,
+      "retrieval_hit": 1.0,
+      "source_precision": 0.5
+    },
+    {
+      "answer_relevance": 0.92,
+      "citation_hit": 1.0,
+      "context_precision": 0.85,
+      "faithfulness": 0.95,
+      "id": "database-async-replication-risk",
+      "reciprocal_rank": 1.0,
+      "retrieval_hit": 1.0,
+      "source_precision": 0.5
+    },
+    {
+      "answer_relevance": 0.98,
+      "citation_hit": 1.0,
+      "context_precision": 0.85,
+      "faithfulness": 0.95,
+      "id": "load-balancer-layer-comparison",
+      "reciprocal_rank": 1.0,
+      "retrieval_hit": 1.0,
+      "source_precision": 0.5
+    }
+  ],
+  "dataset_version": "system-design-v1",
+  "judge_enabled": true,
+  "metrics": {
+    "answer_relevance": 0.96,
+    "citation_hit": 1.0,
+    "context_precision": 0.8166666666666668,
+    "faithfulness": 0.9499999999999998,
+    "reciprocal_rank": 1.0,
+    "retrieval_hit": 1.0,
+    "source_precision": 0.5
+  },
+  "schema_version": 1
+}

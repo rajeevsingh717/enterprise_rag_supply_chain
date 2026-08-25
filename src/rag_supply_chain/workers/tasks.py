@@ -21,6 +21,7 @@ from confluent_kafka import Producer
 from qdrant_client import QdrantClient
 
 from rag_supply_chain.config import settings
+from rag_supply_chain.optimization.normalization import measure_normalization, normalize_text
 from rag_supply_chain.workers.celery_app import celery_app
 from rag_supply_chain.workers.embeddings import DenseEmbedder, sparse_embed
 from rag_supply_chain.workers.qdrant_store import UpsertResult, ensure_collection, upsert_chunks
@@ -76,10 +77,11 @@ def process_batch(
     dense_embedder: DenseEmbedder,
     qdrant_client: QdrantClient,
 ) -> UpsertResult:
-    texts = [c["text"] for c in chunk_payloads]
+    normalized_payloads = [{**chunk, "text": normalize_text(chunk["text"])} for chunk in chunk_payloads]
+    texts = [c["text"] for c in normalized_payloads]
     dense_vectors = dense_embedder.embed(texts)
     sparse_vectors = sparse_embed(texts)
-    return upsert_chunks(qdrant_client, chunk_payloads, dense_vectors, sparse_vectors)
+    return upsert_chunks(qdrant_client, normalized_payloads, dense_vectors, sparse_vectors)
 
 
 def _route_to_dlq(chunk_payloads: list[dict[str, Any]], reason: str) -> None:
@@ -131,4 +133,9 @@ def embed_and_upsert_batch(self, chunk_payloads: list[dict[str, Any]]) -> dict[s
         "status": "ok",
         "upserted": len(result.upserted_chunk_ids),
         "dropped": len(result.dropped),
+        "normalization": measure_normalization(
+            [chunk["text"] for chunk in chunk_payloads],
+            token_count=getattr(_get_dense_embedder(), "count_tokens", None)
+            or (lambda text: len(text.split())),
+        ).to_dict(),
     }

@@ -69,7 +69,10 @@ def test_successful_batch_upserts_and_reports_ok(monkeypatch) -> None:
 
     result = tasks.embed_and_upsert_batch.apply(args=[[_chunk("a"), _chunk("b")]]).get()
 
-    assert result == {"status": "ok", "upserted": 2, "dropped": 0}
+    assert result["status"] == "ok"
+    assert result["upserted"] == 2
+    assert result["dropped"] == 0
+    assert result["normalization"]["before_tokens"] == 4
     assert len(qdrant.upserted_points) == 2
     assert dlq_calls == []
 
@@ -108,7 +111,9 @@ def test_dimensionality_mismatch_drops_and_routes_only_that_chunk_to_dlq(monkeyp
 
     result = tasks.embed_and_upsert_batch.apply(args=[[_chunk("a")]]).get()
 
-    assert result == {"status": "ok", "upserted": 0, "dropped": 1}
+    assert result["status"] == "ok"
+    assert result["upserted"] == 0
+    assert result["dropped"] == 1
     assert len(qdrant.upserted_points) == 0
     assert len(dlq_calls) == 1
     assert dlq_calls[0][0][0]["chunk_id"] == "a"

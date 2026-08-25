@@ -25,6 +25,7 @@ class _TextBlock:
 @dataclass
 class _Response:
     content: list[_TextBlock]
+    usage: object | None = None
 
 
 class _FakeMessages:
@@ -90,3 +91,14 @@ def test_generate_answer_builds_one_document_block_per_chunk_with_citations_enab
     assert len(doc_blocks) == 2
     assert all(b["citations"] == {"enabled": True} for b in doc_blocks)
     assert content[-1] == {"type": "text", "text": "q"}
+
+
+def test_generate_answer_captures_provider_reported_usage(monkeypatch) -> None:
+    monkeypatch.setattr("rag_supply_chain.retrieval.generation.settings.gen_input_cost_per_million", 2)
+    monkeypatch.setattr("rag_supply_chain.retrieval.generation.settings.gen_output_cost_per_million", 10)
+    usage = type("Usage", (), {"input_tokens": 100, "output_tokens": 20})()
+    response = _Response(content=[_TextBlock(text="answer")], usage=usage)
+    result = generate_answer("q", [_chunk("a")], client=FakeAnthropicClient(response))
+    assert result.usage.input_tokens == 100
+    assert result.usage.output_tokens == 20
+    assert result.usage.cost_usd == 0.0004

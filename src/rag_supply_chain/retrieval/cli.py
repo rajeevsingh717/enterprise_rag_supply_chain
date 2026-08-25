@@ -36,6 +36,16 @@ def ask(question: str, top_k: int = typer.Option(None, help="Override retrieval_
     result = generate_answer(question, chunks)
 
     console.print(result.text)
+    console.print(
+        f"\n[dim]Usage: {result.usage.input_tokens} input + "
+        f"{result.usage.output_tokens} output tokens"
+        + (
+            f"; estimated ${result.usage.cost_usd:.6f}"
+            if result.usage.cost_usd is not None
+            else "; cost unavailable (configure current rates)"
+        )
+        + "[/dim]"
+    )
     if result.citations:
         console.print("\n[bold]Sources:[/bold]")
         seen: set[str] = set()

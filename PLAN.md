@@ -4,7 +4,7 @@ Companion to [PORTFOLIO.md](./PORTFOLIO.md). This is the buildable, runnable ver
 architecture blueprint. Decisions locked with the user:
 
 - **Scope:** runnable vertical slice — every component real but pragmatic, runs end-to-end on a laptop via `docker-compose`.
-- **Provider:** Claude (`claude-opus-4-8`) for RAG generation + eval judge; local `sentence-transformers` for embeddings (no embedding API cost).
+- **Provider:** configurable Claude generation/judge models; local `sentence-transformers` for embeddings (no embedding API cost).
 - **Goal:** learn the stack hands-on — use *real* infra (broker, vector DB, async workers), not fakes.
 
 ---
@@ -17,7 +17,7 @@ architecture blueprint. Decisions locked with the user:
 | Vector DB | **Qdrant** | Native hybrid: dense + sparse(BM25-style) + built-in RRF fusion. Matches §3.D exactly. |
 | Async workers | **Celery + Redis** | The canonical distributed task queue the doc (§3.B) describes; dynamic batching + retry live here. |
 | Embeddings | **sentence-transformers** `BAAI/bge-small-en-v1.5` (384-dim, local) | Free, runnable offline, has a matching sparse model for hybrid. |
-| Generation + eval judge | **Claude** `claude-opus-4-8` (judge can use `claude-haiku-4-5`) | Latest capable model; adaptive thinking; no key juggling via `ant auth`. |
+| Generation + eval judge | **Claude** (configured by `GEN_MODEL` / `JUDGE_MODEL`) | Keeps model selection explicit and replaceable as provider offerings change. |
 | Metadata registry | **Postgres** + SQLAlchemy | Transactional `doc_id ↔ chunk_ids` mapping for tombstoning (§3.C). |
 | Orchestration | **docker-compose** | One `up` brings the whole supply chain online. |
 | Language | **Python 3.11+** | sentence-transformers, anthropic SDK, kafka/qdrant clients. |
@@ -25,7 +25,7 @@ architecture blueprint. Decisions locked with the user:
 ### Deviations from PORTFOLIO.md (flagged honestly)
 - **Embedding dim = 384, not 1536.** Local model. The §2.B "exactly 1536" rule becomes "exactly 384 for bge-small". Documented, not silently dropped.
 - **Ingestion is a directory/file watcher, not true CDC/Debezium.** Same event-driven shape (change → event → topic), pragmatic source.
-- **Hybrid ratio** (§4.3 "60/40 dense/sparse") becomes a tunable RRF weight, measured by the eval harness rather than asserted.
+- **Hybrid ratio** (§4.3 "60/40 dense/sparse") is not asserted: the current Qdrant server-side RRF is unweighted; comparative tuning remains follow-up work.
 
 ---
 
@@ -69,12 +69,19 @@ architecture blueprint. Decisions locked with the user:
 - Claude-judge (Ragas-style or custom) scoring: faithfulness, answer relevance, context precision.
 - A fixed QA set + baseline scores; a `make eval` gate that fails on regression.
 - **Done when:** changing a chunking param and running `make eval` shows a score delta and passes/fails the gate.
+- **Status:** vertical slice implemented with a versioned QA set, saved live result,
+  judge metrics, deterministic retrieval metrics, usage telemetry, and a retrieval
+  threshold. Multi-metric baseline comparison/tolerances remain follow-up work.
 
 ### Phase 7 — Cost & Pruning + Polish (§2.C, §4)
 - Token/cost tracking per pipeline run.
 - Boilerplate/whitespace normalization pre-embedding; measure token reduction (target ≥15%).
 - README with the architecture diagram, a `make demo` one-shot, and the operational-learnings metrics reproduced from real runs.
 - **Done when:** `make demo` runs ingest → query → eval and prints the headline metrics.
+- **Status:** implemented as a synchronous one-shot demo reusing production
+  component functions. Token counts come from provider/model telemetry; cost is
+  estimated only when current rates are configured. The ≥15% reduction remains
+  a measured target, not a fabricated claim.
 
 ---
 
@@ -92,13 +99,13 @@ enterprise_rag_supply_chain/
     ├── ingestion/             # watcher, MIME validation, producer, DLQ
     ├── chunking/              # semantic chunker, metadata enrichment
     ├── workers/              # celery app, embedding tasks, backoff
-    ├── lifecycle/            # postgres registry, tombstone/purge
+    ├── registry/             # postgres registry, tombstone/purge
     ├── retrieval/            # qdrant hybrid query, RRF, claude answer
     ├── eval/                 # judge harness, baseline gate
     └── telemetry/            # token/cost tracking
 ```
 
-## Open Questions (defaults chosen; override anytime)
-1. Query entrypoint: **CLI first**, add a thin FastAPI later. (assumed)
-2. Eval judge model: **haiku for scoring** to keep eval runs cheap, opus for generation. (assumed)
-3. Sample corpus: I'll generate a small set of multi-section technical docs unless you have real ones to use.
+## Decisions implemented
+1. Query entrypoint is CLI-first.
+2. Generation and judge models are configured separately.
+3. A small generated multi-section technical corpus is checked in for the demo.

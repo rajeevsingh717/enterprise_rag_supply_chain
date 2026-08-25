@@ -8,13 +8,14 @@ assessment; the CLI's live implementation uses the configured Claude judge.
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from statistics import fmean
 from typing import Protocol
 
 from rag_supply_chain.retrieval.generation import AnswerResult
 from rag_supply_chain.retrieval.hybrid_search import RetrievedChunk
+from rag_supply_chain.telemetry import TokenUsage
 
 
 class EvaluationError(RuntimeError):
@@ -41,6 +42,7 @@ class JudgeScores:
     faithfulness: float
     answer_relevance: float
     context_precision: float
+    usage: TokenUsage = field(default_factory=TokenUsage)
 
 
 @dataclass
@@ -53,6 +55,9 @@ class CaseResult:
     faithfulness: float | None
     answer_relevance: float | None
     context_precision: float | None
+    input_tokens: int
+    output_tokens: int
+    cost_usd: float | None
 
 
 class Pipeline(Protocol):
@@ -102,6 +107,8 @@ def evaluate(dataset: QADataset, pipeline: Pipeline, judge: Judge | None = None)
         rank = next((index for index, match in enumerate(matches, 1) if match), None)
         cited_sources = {citation.source_uri for citation in answer.citations}
         judged = judge.score(case, chunks, answer) if judge is not None else None
+        usages = [answer.usage, judged.usage if judged else TokenUsage()]
+        costs = [usage.cost_usd for usage in usages]
         results.append(
             CaseResult(
                 id=case.id,
@@ -114,6 +121,9 @@ def evaluate(dataset: QADataset, pipeline: Pipeline, judge: Judge | None = None)
                 faithfulness=judged.faithfulness if judged else None,
                 answer_relevance=judged.answer_relevance if judged else None,
                 context_precision=judged.context_precision if judged else None,
+                input_tokens=sum(usage.input_tokens for usage in usages),
+                output_tokens=sum(usage.output_tokens for usage in usages),
+                cost_usd=sum(costs) if all(cost is not None for cost in costs) else None,
             )
         )
 
@@ -131,8 +141,12 @@ def evaluate(dataset: QADataset, pipeline: Pipeline, judge: Judge | None = None)
         values = [getattr(result, name) for result in results]
         present = [value for value in values if value is not None]
         aggregates[name] = fmean(present) if present else None
+    aggregates["input_tokens"] = sum(result.input_tokens for result in results)
+    aggregates["output_tokens"] = sum(result.output_tokens for result in results)
+    costs = [result.cost_usd for result in results]
+    aggregates["cost_usd"] = sum(costs) if all(cost is not None for cost in costs) else None
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "dataset_version": dataset.dataset_version,
         "case_count": len(results),
         "judge_enabled": judge is not None,

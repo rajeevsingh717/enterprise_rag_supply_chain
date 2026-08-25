@@ -21,6 +21,7 @@ from rag_supply_chain.eval.harness import (
 )
 from rag_supply_chain.retrieval.generation import AnswerResult, generate_answer
 from rag_supply_chain.retrieval.hybrid_search import RetrievedChunk, hybrid_search
+from rag_supply_chain.telemetry import usage_from_response
 from rag_supply_chain.workers.embeddings import DenseEmbedder
 
 app = typer.Typer(add_completion=False)
@@ -82,6 +83,11 @@ Generated answer: {answer.text}
             faithfulness=validate_score(raw.get("faithfulness"), "faithfulness"),
             answer_relevance=validate_score(raw.get("answer_relevance"), "answer_relevance"),
             context_precision=validate_score(raw.get("context_precision"), "context_precision"),
+            usage=usage_from_response(
+                response,
+                settings.judge_input_cost_per_million,
+                settings.judge_output_cost_per_million,
+            ),
         )
 
 

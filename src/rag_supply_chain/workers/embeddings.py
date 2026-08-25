@@ -27,7 +27,7 @@ _TOKEN = re.compile(r"[a-z0-9]+")
 
 
 class DenseModel(Protocol):
-    def encode(self, texts: list[str], normalize_embeddings: bool = ...) -> "list[list[float]]": ...
+    def encode(self, texts: list[str], normalize_embeddings: bool = ...) -> list[list[float]]: ...
 
 
 @dataclass
@@ -43,6 +43,9 @@ class DenseEmbedder:
     def embed(self, texts: list[str]) -> list[list[float]]:
         vectors = self._model.encode(texts, normalize_embeddings=True)
         return [list(v) for v in vectors]
+
+    def count_tokens(self, text: str) -> int:
+        return len(self._model.tokenizer.encode(text, add_special_tokens=False))
 
 
 def sparse_embed(texts: list[str]) -> list[SparseVectorData]:

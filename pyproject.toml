@@ -42,6 +42,9 @@ rag-embed = "rag_supply_chain.workers.cli:main"
 rag-query = "rag_supply_chain.retrieval.cli:main"
 rag-registry = "rag_supply_chain.registry.cli:main"
 rag-eval = "rag_supply_chain.eval.cli:main"
+rag-optimize = "rag_supply_chain.optimization.cli:main"
+rag-demo = "rag_supply_chain.demo:main"
+rag-dashboard = "rag_supply_chain.dashboard:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -49,6 +52,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+rag_supply_chain = ["dashboard_assets/*"]
 
 [tool.ruff]
 line-length = 100

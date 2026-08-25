@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RAG Supply Chain — Operations Brief</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Enterprise RAG Supply Chain · Local Brief</p>
+        <h1>From document arrival<br>to grounded answer.</h1>
+        <p class="lede">A live-health, sample-data view of ingestion, hybrid retrieval, evaluation, and efficiency telemetry.</p>
+      </div>
+      <div class="hero-status"><span class="pulse"></span><span id="overall">Checking local stack…</span></div>
+    </header>
+
+    <section class="service-strip" id="services" aria-label="Infrastructure status"></section>
+
+    <section class="panel pipeline-panel">
+      <div class="section-heading"><div><p class="eyebrow">Pipeline</p><h2>One traceable path</h2></div><span class="badge sample">Sample document</span></div>
+      <div class="pipeline" id="pipeline"></div>
+      <div class="document-card">
+        <div class="doc-icon">MD</div>
+        <div><strong id="doc-title">Loading…</strong><p id="doc-meta"></p></div>
+        <div class="topics" id="topics"></div>
+      </div>
+    </section>
+
+    <section class="grid two">
+      <article class="panel query-panel">
+        <div class="section-heading"><div><p class="eyebrow">Grounded query</p><h2>Answer with evidence</h2></div><span class="badge sample" id="query-label">Sample</span></div>
+        <div class="question" id="question"></div>
+        <div class="answer"><span class="answer-mark">A</span><p id="answer"></p></div>
+        <div class="citation"><span>01</span><div><small>Cited source</small><strong id="citation"></strong></div></div>
+      </article>
+
+      <article class="panel eval-panel">
+        <div class="section-heading"><div><p class="eyebrow">Phase 6 baseline</p><h2>Quality at a glance</h2></div><span class="badge" id="case-count"></span></div>
+        <div class="score-grid" id="scores"></div>
+        <p class="fineprint">Committed live result · tiny curated fixture · not a production benchmark</p>
+      </article>
+    </section>
+
+    <section class="panel telemetry-panel">
+      <div class="section-heading"><div><p class="eyebrow">Phase 7 telemetry</p><h2>Optimize what you can measure</h2></div><span class="badge honest" id="target"></span></div>
+      <div class="telemetry-grid">
+        <div class="token-flow"><div><small>Before</small><strong id="before"></strong><span>estimated tokens</span></div><div class="arrow">→</div><div><small>After</small><strong id="after"></strong><span>estimated tokens</span></div></div>
+        <div class="reduction"><div class="ring" id="ring"><span id="reduction"></span></div><p>Observed reduction<br><small>safe sample corpus</small></p></div>
+        <div class="guard"><span class="shield">✓</span><div><strong>Content guard active</strong><p>Meaningful tokens remain ordered; cost is reported only from configured rates.</p></div></div>
+      </div>
+    </section>
+
+    <footer><span>Dense semantics</span><span>+</span><span>Sparse precision</span><span>+</span><span>Lineage</span><span>+</span><span>Evaluation</span></footer>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

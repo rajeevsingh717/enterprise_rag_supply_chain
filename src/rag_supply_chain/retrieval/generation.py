@@ -17,6 +17,7 @@ import anthropic
 
 from rag_supply_chain.config import settings
 from rag_supply_chain.retrieval.hybrid_search import RetrievedChunk
+from rag_supply_chain.telemetry import TokenUsage, usage_from_response
 
 SYSTEM_PROMPT = (
     "Answer the user's question using only the provided documents. "
@@ -36,6 +37,7 @@ class Citation:
 class AnswerResult:
     text: str
     citations: list[Citation] = field(default_factory=list)
+    usage: TokenUsage = field(default_factory=TokenUsage)
 
 
 def _build_document_blocks(chunks: list[RetrievedChunk]) -> list[dict]:
@@ -88,4 +90,9 @@ def generate_answer(
                 )
             )
 
-    return AnswerResult(text="".join(text_parts), citations=citations)
+    usage = usage_from_response(
+        response,
+        settings.gen_input_cost_per_million,
+        settings.gen_output_cost_per_million,
+    )
+    return AnswerResult(text="".join(text_parts), citations=citations, usage=usage)

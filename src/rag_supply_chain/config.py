@@ -57,6 +57,10 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     gen_model: str = "claude-opus-5"
     judge_model: str = "claude-haiku-4-5"
+    gen_input_cost_per_million: float | None = None
+    gen_output_cost_per_million: float | None = None
+    judge_input_cost_per_million: float | None = None
+    judge_output_cost_per_million: float | None = None
 
     # --- Retrieval ---
     retrieval_top_k: int = 8

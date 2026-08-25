@@ -106,8 +106,8 @@ track those tasks.
 ## The query path
 
 **Claude (Anthropic API)** — The large language model that does the actual reasoning.
-- **Two distinct jobs:** **Opus 4.8** *generates the answer* (synthesizes retrieved chunks into a
-  cited response), and **Haiku 4.5** *grades* answers in the eval harness.
+- **Two distinct jobs:** the configured generation model synthesizes a cited answer, and the
+  separately configured judge model grades answers in the eval harness.
 - **Why Claude:** latest, most capable models; the SDK handles auth, retries, and prompt caching
   (which cuts repeat-context cost ~90%).
 
@@ -123,9 +123,9 @@ retrieval fast, fresh, and accurate.
 **Ragas / LLM-as-judge eval** — An automated harness that scores answer quality on **faithfulness**
 (did it stick to the context?), **answer relevance** (did it answer the question?), and **context
 precision** (was the retrieval good?). Haiku does the scoring.
-- **Job here:** §5 — a **regression gate**. Change a chunking parameter, re-run `make eval`, and if
-  scores drop below baseline, the change is rejected. This is the "LLMOps guardrail" that makes the
-  project feel like real infrastructure, not a toy.
+- **Job here:** §5 quality measurement and an initial retrieval threshold. `make eval` writes a
+  current result without overwriting the saved baseline. Multi-metric baseline tolerances remain
+  explicit follow-up work rather than an overstated automatic gate.
 
 ---
 

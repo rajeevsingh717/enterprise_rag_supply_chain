@@ -34,6 +34,8 @@ volumes/
 .mypy_cache/
 .coverage
 htmlcov/
+eval/results-current.json
+demo-results*.json
 
 # OS / editor
 .DS_Store
